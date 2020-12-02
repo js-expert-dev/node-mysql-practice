@@ -1,12 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const {
-    Sequelize
-} = require('sequelize');
+
 const cors = require('cors');
 
-const databaseConnection = require('./config/dbConnection');
-const routes = require('./routes/index');
+const CategoryController = require('./controllers/categoryController');
+const models = require('./models');
 
 
 const app = express();
@@ -17,17 +15,19 @@ app.use(bodyParser.urlencoded({
     limit: '50mb'
 }));
 app.use(cors());
-app.use('/', routes);
+
+models.sequelize.sync().then((res) => {
+    console.log("Database is connected successfully");
+}).catch((err) => {
+    console.log("Database is disconnected with error", err);
+});
+
 app.use(express.static('uploads'));
 
 
+app.post('/category', CategoryController.create);
 
-const sequelize = new Sequelize("user", 'root', 'password', {
-    host: 'localhost',
-    dialect: 'mysql'
-});
 
-databaseConnection(sequelize);
 
 app.listen(3000, () => {
     console.log("app is listing on port http://localhost:3000");
